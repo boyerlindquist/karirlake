@@ -5,7 +5,7 @@
     <script>
         (function() {
             try {
-                var savedTheme = localStorage.getItem('talentlake_theme') || 'dark';
+                var savedTheme = localStorage.getItem('karirlake_theme') || localStorage.getItem('talentlake_theme') || 'dark';
                 document.documentElement.setAttribute('data-theme', savedTheme);
             } catch (e) {
                 document.documentElement.setAttribute('data-theme', 'dark');
@@ -15,7 +15,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}TalentLake | Indonesian Tech Job Market Intelligence{% endblock %}</title>
+    <title>{% block title %}KarirLake | Indonesian Tech Job Market Intelligence{% endblock %}</title>
 
     <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,11 +38,11 @@
     <nav class="navbar-custom">
         <div class="container-fluid navbar-grid">
             
-            <!-- Brand Logo (Left: Clean TalentLake Brand) -->
+            <!-- Brand Logo (Left: Clean KarirLake Brand) -->
             <div class="navbar-col-left">
                 <a href="{{ url_for('views.index') }}" class="brand-title">
                     <span class="ember-pulse"></span>
-                    <span>TalentLake</span>
+                    <span>KarirLake</span>
                 </a>
             </div>
 
@@ -146,7 +146,7 @@
 
     <!-- FOOTER -->
     <footer class="text-center py-4 border-top border-secondary border-opacity-10 text-muted" style="position: relative; z-index: 1;">
-        <p class="mono-tag mb-1">TalentLake &bull; End-to-End Modern Data Lakehouse Architecture</p>
+        <p class="mono-tag mb-1">KarirLake &bull; End-to-End Modern Data Lakehouse Architecture</p>
         <small class="text-secondary" style="font-size: 0.75rem;">
             Orchestrated with Apache Airflow &bull; Modeled via dbt-DuckDB &bull; Verified by Soda Core &bull; Powered by Flask
         </small>
@@ -165,7 +165,7 @@
         function setTheme(theme) {
             htmlElement.setAttribute('data-theme', theme);
             try {
-                localStorage.setItem('talentlake_theme', theme);
+                localStorage.setItem('karirlake_theme', theme);
             } catch (e) {}
             syncThemeIcons(theme);
             // Trigger Chart.js theme update if exists

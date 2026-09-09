@@ -112,14 +112,14 @@ def init_app_db():
         cursor.execute("UPDATE saved_jobs SET last_stage = 'Applied' WHERE status = 'Wishlist'")
 
         # 3. Seed default demo account jika belum ada
-        cursor.execute("SELECT id FROM users WHERE email = ?", ("demo@talentlake.id",))
+        cursor.execute("SELECT id FROM users WHERE email = ?", ("demo@karirlake.id",))
         user = cursor.fetchone()
         if not user:
             demo_pass = generate_password_hash("admin123")
             cursor.execute("""
                 INSERT INTO users (username, email, password_hash)
                 VALUES (?, ?, ?)
-            """, ("Demo Engineer", "demo@talentlake.id", demo_pass))
+            """, ("Demo Engineer", "demo@karirlake.id", demo_pass))
             demo_user_id = cursor.lastrowid
         else:
             demo_user_id = user["id"]

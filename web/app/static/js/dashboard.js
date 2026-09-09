@@ -1,5 +1,5 @@
 /**
- * TalentLake Dashboard - Chart.js & Reactive Role Filtering
+ * KarirLake Dashboard - Chart.js & Reactive Role Filtering
  */
 
 let skillsChart = null;

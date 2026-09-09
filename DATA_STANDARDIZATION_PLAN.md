@@ -1,6 +1,6 @@
 # Data Pipeline Standardization Plan
 
-Dokumen perencanaan teknis untuk standardisasi dan pembersihan data (*data cleansing & normalization*) pada pipeline analitik TalentLake (Glints & Kalibrr) sebelum disajikan ke Gold Data Marts dan Web Dashboard.
+Dokumen perencanaan teknis untuk standardisasi dan pembersihan data (*data cleansing & normalization*) pada pipeline analitik KarirLake (Glints & Kalibrr) sebelum disajikan ke Gold Data Marts dan Web Dashboard.
 
 ---
 
@@ -216,4 +216,4 @@ Setelah pipeline dbt diperbarui oleh developer, tambahkan checks berikut pada `s
    - Pastikan Setiabudi, Tanah Abang, Kebayoran Baru sudah teragregasi ke `Jakarta Selatan` / `Jakarta Pusat`.
 
 ---
-*Dokumen ini dibuat sebagai panduan kerja dan tracking standardisasi data pipeline TalentLake.*
+*Dokumen ini dibuat sebagai panduan kerja dan tracking standardisasi data pipeline KarirLake.*

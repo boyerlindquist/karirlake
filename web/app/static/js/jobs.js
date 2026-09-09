@@ -1,5 +1,5 @@
 /**
- * TalentLake - Live Job Explorer JavaScript
+ * KarirLake - Live Job Explorer JavaScript
  * Features:
  * - Dynamic column sorting (Text, Numeric, Date) with direction toggles & icons
  * - Client-side pagination (15 jobs/page) with smart navigation & counter

@@ -13,7 +13,7 @@ app = create_app()
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5050))
     print("\n" + "=" * 60)
-    print("TalentLake Intelligence Web Server Starting...")
+    print("KarirLake Intelligence Web Server Starting...")
     print(f"Local Access: http://127.0.0.1:{port} or http://localhost:{port}")
     print("=" * 60 + "\n")
     app.run(host="0.0.0.0", port=port, debug=True)

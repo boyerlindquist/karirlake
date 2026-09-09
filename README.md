@@ -1,4 +1,4 @@
-# TalentLake: End-to-End Modern Analytical Lakehouse for Indonesia Tech Job Market
+# KarirLake: End-to-End Modern Analytical Lakehouse for Indonesia Tech Job Market
 
 [![Airflow](https://img.shields.io/badge/Apache%20Airflow-2.8+-017CEE?style=for-the-badge&logo=Apache%20Airflow&logoColor=white)](https://airflow.apache.org/)
 [![dbt](https://img.shields.io/badge/dbt-Core%20v1.7+-FF694B?style=for-the-badge&logo=dbt&logoColor=white)](https://www.getdbt.com/)
@@ -7,8 +7,7 @@
 [![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-Web%20Dashboard-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
-
-An enterprise-grade, automated **Medallion Data Lakehouse** pipeline and analytical intelligence platform that extracts, standardizes, validates, and visualizes fragmented tech job postings and salary compensation benchmarks across major Indonesian job portals (Glints, Kalibrr, etc.).
+An automated **Medallion Data Lakehouse** pipeline and analytical intelligence platform that extracts, standardizes, validates, and visualizes fragmented tech job postings and salary compensation benchmarks across Indonesian job portals (currently supporting Glints and Kalibrr, with more portals coming soon).
 
 ---
 
@@ -19,7 +18,7 @@ Job hunters, engineers, and tech recruiters in Indonesia face major industry pai
 2. **Opaque Compensation**: Salaries are either undisclosed, formatted differently (e.g. annual vs monthly, string ranges), or lack standardization per city.
 3. **Siloed Tracking**: Candidates apply across multiple portals and lose track of their interview pipeline, lacking clear metrics on their application-to-interview conversion rate.
 
-**TalentLake** solves this by implementing an end-to-end data platform:
+**KarirLake** solves this by implementing an end-to-end data platform:
 * **Automated Extraction**: Daily scheduled scraping pipelines orchestrated by Apache Airflow.
 * **Data Contracts & Governance**: Automated Soda Core scans validating data integrity before and after modeling.
 * **Medallion Modeling**: dbt models transforming multi-source Bronze Parquet files into clean Silver views and Gold analytical marts stored in DuckDB.
@@ -146,23 +145,31 @@ checks for bronze_glints:
 ### Gold Quality Gate (`checks_gold.yml`)
 ```yaml
 checks for init_all_jobs:
-  - duplicate_count(platform_job_composite_key) = 0:
-      name: "Composite key (platform + job_id) must be unique"
-  - min(salary_min) >= 0:
-      name: "Salary min cannot be negative"
-  - min(salary_max) >= 0:
-      name: "Salary max cannot be negative"
-  - invalid_count(salary_max) = 0:
-      valid min: 0
+  - duplicate_count(job_id, source_platform) = 0:
+      name: "Duplicate composite key check"
+  - invalid_count(standard_role) = 0:
+      valid values: ['Data Engineer', 'Data Analyst', 'Data Scientist', 'Database Administrator', 'Data Architect']
+  - invalid_count(work_arrangement) = 0:
+      valid values: ['Remote', 'Hybrid', 'Onsite']
+  - invalid_count(education_level) = 0:
+      valid values: ['High School', 'Diploma', 'Bachelor', 'Master', 'Doctorate', 'Not Specified']
+
+checks for mart_salary_insights:
+  - min(avg_salary_min) >= 0
+  - min(avg_salary_max) >= 0
+
+checks for mart_top_skills:
+  - missing_count(skill_name) = 0
+  - min(total_demand) > 0
 ```
 
-> **Validation Status**: `8/8 Bronze Checks PASSED` | `6/6 Gold Checks PASSED`
+> **Validation Status**: `8/8 Bronze Checks PASSED` | `9/9 Gold Checks PASSED`
 
 ---
 
 ## Web Intelligence Platform Features
 
-The consumption layer ([TalentLake Web Platform](file:///home/imam/project/analytic-lakehouse/web)) brings the Lakehouse data to life:
+The consumption layer ([KarirLake Web Platform](file:///home/imam/project/analytic-lakehouse/web)) brings the Lakehouse data to life:
 
 1. **Analytical Executive Dashboard**:
    - High-level KPIs: Total Verified Jobs, Average Market Salary (IDR), Remote Ratio Index, Active Employers.

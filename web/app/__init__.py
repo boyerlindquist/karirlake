@@ -2,7 +2,7 @@ import os
 from flask import Flask
 
 def create_app():
-    """Application Factory for TalentLake Web Application."""
+    """Application Factory for KarirLake Web Application."""
     app = Flask(
         __name__,
         template_folder="templates",
@@ -11,8 +11,8 @@ def create_app():
 
     # Configuration
     from datetime import timedelta
-    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "talentlake-secret-key-2026")
-    app.config["SESSION_COOKIE_NAME"] = "talentlake_session"
+    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "karirlake-secret-key-2026")
+    app.config["SESSION_COOKIE_NAME"] = "karirlake_session"
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
