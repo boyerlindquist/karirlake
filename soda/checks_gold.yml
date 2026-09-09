@@ -1,0 +1,28 @@
+# Pengecekan Data Quality setelah transformasi Gold selesai
+
+checks for init_all_jobs:
+  - duplicate_count(job_id, source_platform) = 0:
+      name: Tidak boleh ada job_id duplikat dari platform yang sama
+  - row_count > 0:
+      name: Tabel gabungan (Silver) tidak boleh kosong
+  - invalid_count(standard_role) = 0:
+      valid values: ['Data Engineer', 'Data Analyst', 'Data Scientist', 'Database Administrator', 'Data Architect']
+      name: Role pekerjaan harus masuk ke dalam 5 kategori standar
+  - invalid_count(work_arrangement) = 0:
+      valid values: ['Remote', 'Hybrid', 'Onsite']
+      name: Work arrangement harus Remote, Hybrid, atau Onsite
+  - invalid_count(education_level) = 0:
+      valid values: ['High School', 'Diploma', 'Bachelor', 'Master', 'Doctorate', 'Not Specified']
+      name: Jenjang pendidikan harus sesuai dengan standar yang ditentukan
+
+checks for mart_salary_insights:
+  - min(avg_salary_min) >= 0:
+      name: Gaji rata-rata minimal tidak boleh bernilai negatif (minus)
+  - min(avg_salary_max) >= 0:
+      name: Gaji rata-rata maksimal tidak boleh bernilai negatif
+
+checks for mart_top_skills:
+  - missing_count(skill_name) = 0:
+      name: Nama skill tidak boleh Null
+  - min(total_demand) > 0:
+      name: Jumlah pencarian skill harus minimal 1

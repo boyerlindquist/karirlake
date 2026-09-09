@@ -1,0 +1,19 @@
+checks for stg_kalibrr_jobs:
+  - row_count > 0:
+      name: Kalibrr Parquet tidak boleh kosong (Pastikan Scraper jalan)
+  - missing_count(job_id) = 0:
+      name: Job ID tidak boleh ada yang null (Syarat Primary Key)
+  - duplicate_count(job_id) = 0:
+      name: Tidak boleh ada lowongan yang terduplikat di Kalibrr
+  - missing_count(job_title) = 0:
+      name: Judul pekerjaan wajib ada
+
+checks for stg_glints_jobs:
+  - row_count > 0:
+      name: Glints Parquet tidak boleh kosong (Pastikan Scraper jalan)
+  - missing_count(job_id) = 0:
+      name: Job ID tidak boleh ada yang null (Syarat Primary Key)
+  - duplicate_count(job_id) = 0:
+      name: Tidak boleh ada lowongan yang terduplikat di Glints
+  - missing_count(job_title) = 0:
+      name: Judul pekerjaan wajib ada

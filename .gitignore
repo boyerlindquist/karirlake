@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# DuckDB / Storage
+*.duckdb
+*.duckdb.wal
+
+# dbt
+dbt_lakehouse/target/
+dbt_lakehouse/dbt_packages/
+dbt_lakehouse/logs/
+
+# Airflow
+airflow/logs/
+airflow/*.pid
+
+# Environment & Big Binary Files
+.env
+*.deb
+*.tar.gz
+*.zip
+
+# OS & Editor
+.DS_Store
+.idea/
+.agents/

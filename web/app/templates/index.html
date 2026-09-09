@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}TalentLake | Tech Job Market & Salary Intelligence{% endblock %}
+
+{% block content %}
+
+<!-- HERO BANNER -->
+<section class="hero-glow-container text-center">
+    <div class="hero-glow-bg"></div>
+    <div class="container">
+        <span class="badge hero-intel-badge mono-tag mb-2 px-3 py-1">
+            <i class="bi bi-fire me-1"></i> Indonesia Tech Talent Intelligence
+        </span>
+        <h1 class="hero-title">Real-Time Job Market & Compensation Insights</h1>
+        <p class="hero-subtitle mx-auto">
+            Agregasi data lowongan kerja tech dari berbagai portal resmi Indonesia. Terstandarisasi, terverifikasi, dan siap dipakai untuk benchmarking karir & rekrutmen.
+        </p>
+
+        <!-- ROLE FILTER PILLS -->
+        <div class="role-pill-bar justify-content-center mt-3" id="roleFilterBar">
+            {% for role in roles %}
+            <button class="role-pill {% if role == current_role %}active{% endif %}" data-role="{{ role }}">
+                {% if role == 'Data Engineer' %}<i class="bi bi-gear-wide-connected"></i>
+                {% elif role == 'Data Analyst' %}<i class="bi bi-graph-up-arrow"></i>
+                {% elif role == 'Data Scientist' %}<i class="bi bi-cpu"></i>
+                {% elif role == 'Database Administrator' %}<i class="bi bi-database-fill-gear"></i>
+                {% elif role == 'Data Architect' %}<i class="bi bi-diagram-3"></i>
+                {% else %}<i class="bi bi-briefcase"></i>{% endif %}
+                <span>{{ role }}</span>
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- 4 KPI PULSE CARDS -->
+<section class="mb-4">
+    <div class="row g-3">
+        <!-- KPI 1 -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card">
+                <div class="kpi-mono-idx mono-tag">
+                    <span>[01] // TOTAL SUPPLY</span>
+                    <i class="bi bi-layers-fill text-muted"></i>
+                </div>
+                <div class="kpi-value" id="kpiTotalJobs">{{ "{:,}".format(initial_insights.kpis.total_jobs) }}</div>
+                <div class="kpi-label">Lowongan <span class="current-role-badge">{{ current_role }}</span></div>
+            </div>
+        </div>
+
+        <!-- KPI 2 -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card">
+                <div class="kpi-mono-idx mono-tag">
+                    <span>[02] // SALARY BENCHMARK</span>
+                    <i class="bi bi-cash-stack text-success"></i>
+                </div>
+                <div class="kpi-value salary-accent" id="kpiAvgSalary">
+                    {% if initial_insights.kpis.avg_salary > 0 %}
+                    Rp {{ "{:,.0f}".format(initial_insights.kpis.avg_salary / 1000000) }} Jt
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </div>
+                <div class="kpi-label">Rata-Rata Gaji Pasar / Bulan</div>
+            </div>
+        </div>
+
+        <!-- KPI 3 -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card">
+                <div class="kpi-mono-idx mono-tag">
+                    <span>[03] // REMOTE INDEX</span>
+                    <i class="bi bi-house-door text-warning"></i>
+                </div>
+                <div class="kpi-value orange-accent" id="kpiRemotePct">{{ initial_insights.kpis.remote_pct }}%</div>
+                <div class="kpi-label">Peluang Kerja Remote / WFH</div>
+            </div>
+        </div>
+
+        <!-- KPI 4 -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card">
+                <div class="kpi-mono-idx mono-tag">
+                    <span>[04] // ACTIVE EMPLOYERS</span>
+                    <i class="bi bi-buildings-fill text-info"></i>
+                </div>
+                <div class="kpi-value indigo-accent" id="kpiTotalCompanies">{{ "{:,}".format(initial_insights.kpis.total_companies) }}</div>
+                <div class="kpi-label">Perusahaan Aktif Merekrut</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ANALYTICAL CHARTS SECTION -->
+<section>
+    <!-- ROW 1: Top Skills & Salary by City -->
+    <div class="row g-3 mb-3">
+        <!-- Skills Chart -->
+        <div class="col-12 col-lg-7">
+            <div class="studio-card">
+                <div class="card-title-studio mb-3">
+                    <div>
+                        <span><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Top In-Demand Skills</span>
+                        <div class="card-subtext">Skill paling banyak dicari industri untuk role <span class="current-role-badge">{{ current_role }}</span></div>
+                    </div>
+                    <span class="badge mono-tag studio-badge-secondary">RANKING #1-#12</span>
+                </div>
+                <div style="position: relative; height: 320px;">
+                    <canvas id="skillsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Salary Chart -->
+        <div class="col-12 col-lg-5">
+            <div class="studio-card">
+                <div class="card-title-studio mb-3">
+                    <div>
+                        <span><i class="bi bi-wallet2 text-success me-1"></i> Salary by Location</span>
+                        <div class="card-subtext">Rentang gaji (Min, Rata-rata, Max) per Kota dalam Rupiah</div>
+                    </div>
+                    <span class="badge badge-currency-tag mono-tag">IDR / MONTH</span>
+                </div>
+                <div style="position: relative; height: 320px;">
+                    <canvas id="salaryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 2: Work Arrangements & Employment Types -->
+    <div class="row g-3 mb-3">
+        <!-- Work Arrangement Donut -->
+        <div class="col-12 col-lg-6">
+            <div class="studio-card">
+                <div class="card-title-studio mb-3">
+                    <div>
+                        <span><i class="bi bi-laptop text-info me-1"></i> Work Arrangement</span>
+                        <div class="card-subtext">Distribusi Onsite, Hybrid, dan Remote (WFH)</div>
+                    </div>
+                </div>
+                <div style="position: relative; height: 260px;">
+                    <canvas id="workArrangementChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employment Type Donut -->
+        <div class="col-12 col-lg-6">
+            <div class="studio-card">
+                <div class="card-title-studio mb-3">
+                    <div>
+                        <span><i class="bi bi-briefcase-fill text-success me-1"></i> Employment Type</span>
+                        <div class="card-subtext">Distribusi Full-time, Kontrak, Internship, Part-time & Freelance</div>
+                    </div>
+                </div>
+                <div style="position: relative; height: 260px;">
+                    <canvas id="employmentTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 3: Experience Tiers, Education, Location Spread -->
+    <div class="row g-3 mb-3">
+        <!-- Experience Tiers Bar Chart -->
+        <div class="col-12 col-md-4">
+            <div class="studio-card">
+                <div class="card-title-studio mb-3">
+                    <div>
+                        <span><i class="bi bi-person-workspace text-warning me-1"></i> Experience Seniority</span>
+                        <div class="card-subtext">Distribusi tingkat pengalaman kerja</div>
+                    </div>
+                </div>
+                <div style="position: relative; height: 250px;">
+                    <canvas id="experienceTierChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Education Req Donut -->
+        <div class="col-12 col-md-4">
+            <div class="studio-card">
+                <div class="card-title-studio mb-3">
+                    <div>
+                        <span><i class="bi bi-mortarboard text-primary me-1"></i> Education Threshold</span>
+                        <div class="card-subtext">Kualifikasi minimal pendidikan</div>
+                    </div>
+                </div>
+                <div style="position: relative; height: 250px;">
+                    <canvas id="educationChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Location Hotspots Bar -->
+        <div class="col-12 col-md-4">
+            <div class="studio-card">
+                <div class="card-title-studio mb-3">
+                    <div>
+                        <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> Geographic Hubs</span>
+                        <div class="card-subtext">Konsentrasi kota pembuka lowongan</div>
+                    </div>
+                </div>
+                <div style="position: relative; height: 250px;">
+                    <canvas id="locationChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 3: Top Hiring Companies Leaderboard -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="studio-card">
+                <div class="card-title-studio mb-3">
+                    <div>
+                        <span><i class="bi bi-building-check text-warning me-1"></i> Top Hiring Employers</span>
+                        <div class="card-subtext">Perusahaan yang paling agresif merekrut untuk role <span class="current-role-badge">{{ current_role }}</span></div>
+                    </div>
+                    <a href="{{ url_for('views.jobs') }}" class="btn-studio-outline mono-tag">
+                        Explore All Jobs <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+
+                <div class="row g-3" id="topCompaniesContainer">
+                    {% for comp in initial_insights.top_companies %}
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <div class="p-3 rounded-3 d-flex flex-column justify-content-between h-100" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle);">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                    <span class="badge mono-tag text-truncate employer-industry-badge" style="max-width: 60%;" title="{{ comp.industry or 'Tech / General' }}">
+                                        {{ comp.industry or 'Tech / General' }}
+                                    </span>
+                                    <span class="badge mono-tag flex-shrink-0 employer-openings-badge">
+                                        {{ comp.openings }} Loker
+                                    </span>
+                                </div>
+                                <div class="fw-bold text-truncate" style="color: var(--text-primary); font-size: 0.95rem;" title="{{ comp.name }}">{{ comp.name }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- INJECT INITIAL DATA FOR JS -->
+<script id="initialInsightsData" type="application/json">{{ initial_insights | tojson }}</script>
+<script>
+    const INITIAL_ROLE = "{{ current_role }}";
+    const INITIAL_INSIGHTS = JSON.parse(document.getElementById('initialInsightsData').textContent);
+</script>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

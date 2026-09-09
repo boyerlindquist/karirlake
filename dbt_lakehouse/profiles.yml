@@ -1,0 +1,7 @@
+duckdb_profile:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path : 'lakehouse.duckdb'
+      threads: 4

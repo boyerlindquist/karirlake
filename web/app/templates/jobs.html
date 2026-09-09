@@ -1,0 +1,488 @@
+{% extends "base.html" %}
+
+{% block title %}TalentLake | Live Job Explorer{% endblock %}
+
+{% block content %}
+
+<!-- HEADER & FILTERS -->
+<section class="py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1" style="letter-spacing: -0.03em; color: var(--text-primary);">
+                Live Job Explorer
+            </h2>
+            <p class="text-secondary mb-0" style="font-size: 0.92rem; font-weight: 500;">
+                Daftar lowongan kerja terverifikasi dan terstandarisasi dari Glints & Kalibrr.
+            </p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            {% if search_query %}
+            <a href="{{ url_for('views.jobs', role=selected_role, platform=selected_platform) }}"
+                class="btn btn-sm btn-studio-outline" title="Reset pencarian">
+                <i class="bi bi-x-circle me-1 text-danger"></i> Reset Search
+            </a>
+            {% endif %}
+            <span class="badge studio-badge-secondary mono-tag py-2 px-3 align-self-start align-self-md-center">
+                <i class="bi bi-check-circle-fill text-success me-1"></i> {{ total_found }} Loker Tersedia
+            </span>
+        </div>
+    </div>
+
+    <!-- FILTER BAR CARD -->
+    <div class="studio-card mb-4 p-3">
+        <form method="GET" action="{{ url_for('views.jobs') }}" id="jobFilterForm">
+            <!-- Row 1: Keyword, Role, Platform, Actions -->
+            <div class="row g-2 align-items-center mb-2">
+                <!-- Fuzzy Keyword Search -->
+                <div class="col-12 col-lg-5">
+                    <div class="input-group">
+                        <span class="input-group-text input-group-text-studio"
+                            title="Pencarian Cerdas / Fuzzy Search Aktif">
+                            <i class="bi bi-stars"></i>
+                        </span>
+                        <input type="text" name="q" class="form-control form-control-studio"
+                            placeholder="Cari posisi, skill (Python, SQL), perusahaan, kota..." value="{{ search_query }}"
+                            autocomplete="off">
+                    </div>
+                </div>
+
+                <!-- Role Selector -->
+                <div class="col-12 col-sm-6 col-lg-3">
+                    <select name="role" class="form-select form-select-studio" id="filterRole">
+                        <option value="All" {% if selected_role=='All' %}selected{% endif %}>Semua Posisi (All Roles)</option>
+                        {% for role in roles %}
+                        <option value="{{ role }}" {% if selected_role==role %}selected{% endif %}>{{ role }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Platform Selector -->
+                <div class="col-12 col-sm-6 col-lg-2">
+                    <select name="platform" class="form-select form-select-studio" id="filterPlatform">
+                        <option value="All" {% if selected_platform=='All' %}selected{% endif %}>Semua Portal</option>
+                        <option value="Glints" {% if selected_platform=='Glints' %}selected{% endif %}>Glints</option>
+                        <option value="Kalibrr" {% if selected_platform=='Kalibrr' %}selected{% endif %}>Kalibrr</option>
+                    </select>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="col-12 col-lg-2 d-grid">
+                    <button type="submit" class="btn btn-studio-primary">
+                        <i class="bi bi-funnel-fill me-1"></i> Terapkan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Row 2: Work Arrangement, Employment Type, Experience Tier -->
+            <div class="row g-2 align-items-center pt-2 border-top border-secondary border-opacity-25">
+                <!-- Work Arrangement -->
+                <div class="col-12 col-sm-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="text-secondary small fw-semibold text-nowrap" for="filterWorkArrangement">
+                            <i class="bi bi-laptop me-1"></i>Skema:
+                        </label>
+                        <select name="work_arrangement" id="filterWorkArrangement" class="form-select form-select-sm form-select-studio">
+                            <option value="All" {% if selected_work_arrangement=='All' %}selected{% endif %}>Semua Skema</option>
+                            <option value="Remote" {% if selected_work_arrangement=='Remote' %}selected{% endif %}>Remote (WFH)</option>
+                            <option value="Hybrid" {% if selected_work_arrangement=='Hybrid' %}selected{% endif %}>Hybrid</option>
+                            <option value="Onsite" {% if selected_work_arrangement=='Onsite' %}selected{% endif %}>Onsite</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Employment Type -->
+                <div class="col-12 col-sm-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="text-secondary small fw-semibold text-nowrap" for="filterEmploymentType">
+                            <i class="bi bi-briefcase me-1"></i>Kontrak:
+                        </label>
+                        <select name="employment_type" id="filterEmploymentType" class="form-select form-select-sm form-select-studio">
+                            <option value="All" {% if selected_employment_type=='All' %}selected{% endif %}>Semua Kontrak</option>
+                            <option value="Full-time" {% if selected_employment_type=='Full-time' %}selected{% endif %}>Full-time</option>
+                            <option value="Contractual" {% if selected_employment_type=='Contractual' %}selected{% endif %}>Contractual</option>
+                            <option value="Internship" {% if selected_employment_type=='Internship' %}selected{% endif %}>Internship</option>
+                            <option value="Part-time" {% if selected_employment_type=='Part-time' %}selected{% endif %}>Part-time</option>
+                            <option value="Freelance" {% if selected_employment_type=='Freelance' %}selected{% endif %}>Freelance</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Experience Tier -->
+                <div class="col-12 col-sm-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="text-secondary small fw-semibold text-nowrap" for="filterExpTier">
+                            <i class="bi bi-clock-history me-1"></i>Pengalaman:
+                        </label>
+                        <select name="exp_tier" id="filterExpTier" class="form-select form-select-sm form-select-studio">
+                            <option value="All" {% if selected_exp_tier=='All' %}selected{% endif %}>Semua Pengalaman</option>
+                            <option value="Entry Level" {% if selected_exp_tier=='Entry Level' %}selected{% endif %}>Entry Level (&lt; 1 thn)</option>
+                            <option value="Junior" {% if selected_exp_tier=='Junior' %}selected{% endif %}>Junior (1 - 2 thn)</option>
+                            <option value="Mid-Level" {% if selected_exp_tier=='Mid-Level' %}selected{% endif %}>Mid-Level (3 - 4 thn)</option>
+                            <option value="Senior" {% if selected_exp_tier=='Senior' %}selected{% endif %}>Senior (5 - 7 thn)</option>
+                            <option value="Lead / Principal" {% if selected_exp_tier=='Lead / Principal' %}selected{% endif %}>Lead / Principal (&gt; 7 thn)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        {% if search_query %}
+        <div class="mt-2 pt-2 border-top border-secondary border-opacity-25 d-flex align-items-center gap-2 flex-wrap">
+            <small class="text-secondary fw-semibold"><i class="bi bi-info-circle me-1"></i>Hasil pencarian cerdas
+                untuk:</small>
+            <span class="badge-fuzzy-match">"{{ search_query }}"</span>
+            <small class="text-secondary ms-auto fw-semibold">Urut berdasarkan tingkat kecocokan (relevance)</small>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- JOB LISTINGS TABLE -->
+    <div class="studio-card p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th class="sortable-th col-flexible" data-sort-type="text" data-col="0"
+                            title="Klik untuk mengurutkan posisi & perusahaan">
+                            <span>Posisi & Perusahaan</span>
+                            <i class="bi bi-arrow-down-up sort-icon"></i>
+                        </th>
+                        <th class="sortable-th col-role-tight" data-sort-type="text" data-col="1"
+                            title="Klik untuk mengurutkan kategori role">
+                            <span>Standard Role</span>
+                            <i class="bi bi-arrow-down-up sort-icon"></i>
+                        </th>
+                        <th class="sortable-th col-nowrap" data-sort-type="text" data-col="2"
+                            title="Klik untuk mengurutkan lokasi & skema">
+                            <span>Lokasi & Skema</span>
+                            <i class="bi bi-arrow-down-up sort-icon"></i>
+                        </th>
+                        <th class="sortable-th col-nowrap" data-sort-type="text" data-col="3"
+                            title="Klik untuk mengurutkan kontrak & kualifikasi">
+                            <span>Kontrak & Syarat</span>
+                            <i class="bi bi-arrow-down-up sort-icon"></i>
+                        </th>
+                        <th class="col-flexible">
+                            <span>Keahlian (Skills)</span>
+                        </th>
+                        <th class="sortable-th col-nowrap" data-sort-type="num" data-col="5"
+                            title="Klik untuk mengurutkan rentang gaji">
+                            <span>Rentang Gaji</span>
+                            <i class="bi bi-arrow-down-up sort-icon"></i>
+                        </th>
+                        <th class="sortable-th col-nowrap" data-sort-type="date" data-col="6"
+                            title="Klik untuk mengurutkan tanggal post">
+                            <span>Diposting</span>
+                            <i class="bi bi-arrow-down-up sort-icon"></i>
+                        </th>
+                        <th class="sortable-th col-nowrap" data-sort-type="text" data-col="7"
+                            title="Klik untuk mengurutkan platform sumber">
+                            <span>Sumber</span>
+                            <i class="bi bi-arrow-down-up sort-icon"></i>
+                        </th>
+                        <th class="col-nowrap text-end">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="jobsTableBody">
+                    {% if jobs %}
+                    {% for job in jobs %}
+                    <tr class="job-row" 
+                        data-job-title="{{ job.job_title }}" 
+                        data-company="{{ job.company_name }}"
+                        data-role="{{ job.standard_role }}" 
+                        data-skills="{{ job.skills|join('||') }}"
+                        data-url="{{ job.job_url or '' }}"
+                        data-company-url="{{ job.company_url or '' }}"
+                        data-city="{{ job.location_city or '' }}"
+                        data-work-type="{{ job.work_type or '' }}"
+                        data-work-arrangement="{{ job.work_arrangement or '' }}"
+                        data-employment-type="{{ job.employment_type or '' }}"
+                        data-education-level="{{ job.education_level or '' }}"
+                        data-min-exp="{{ job.min_experience or '' }}"
+                        data-exp-tier="{{ job.experience_tier or '' }}"
+                        data-exp-display="{{ job.experience_display or '' }}"
+                        data-salary-min="{{ job.salary_min or '' }}"
+                        data-salary-max="{{ job.salary_max or '' }}"
+                        data-platform="{{ job.source_platform or '' }}"
+                        data-is-saved="{{ 'true' if job.is_saved else 'false' }}">
+                        <!-- 0. Title & Company -->
+                        <td class="col-flexible" data-sort-val="{{ job.job_title }}">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <div class="fw-bold" style="color: var(--text-primary); font-size: 0.95rem;">{{
+                                    job.job_title }}</div>
+                                {% if job.match_score and job.match_score < 100 %} <span class="badge-fuzzy-match"
+                                    title="Skor kemiripan fuzzy">{{ job.match_score }}% match</span>
+                                    {% endif %}
+                            </div>
+                            <div class="text-secondary small d-flex align-items-center gap-1 fw-medium">
+                                <i class="bi bi-building text-muted"></i>
+                                {% if job.company_url %}
+                                <a href="{{ job.company_url }}" target="_blank" rel="noopener noreferrer"
+                                    class="company-link" title="Buka website/profil {{ job.company_name }}">
+                                    <span>{{ job.company_name }}</span>
+                                    <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.7rem;"></i>
+                                </a>
+                                {% else %}
+                                <span>{{ job.company_name }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- 1. Standard Role -->
+                        <td class="col-role-tight" data-sort-val="{{ job.standard_role }}">
+                            <span class="badge studio-badge-role mono-tag">
+                                {{ job.standard_role }}
+                            </span>
+                        </td>
+
+                        <!-- 2. Location & Work Arrangement -->
+                        <td class="col-nowrap" data-sort-val="{{ job.location_city }}">
+                            <div class="d-flex flex-column gap-1">
+                                <span class="small fw-semibold" style="color: var(--text-secondary);">
+                                    <i class="bi bi-geo-alt text-danger me-1"></i>{{ job.location_city }}
+                                </span>
+                                <div>
+                                    {% if job.work_arrangement == 'Remote' %}
+                                    <span class="badge badge-work-remote mono-tag"><i class="bi bi-laptop me-1"></i>Remote</span>
+                                    {% elif job.work_arrangement == 'Hybrid' %}
+                                    <span class="badge badge-work-hybrid mono-tag"><i class="bi bi-building-slash me-1"></i>Hybrid</span>
+                                    {% elif job.work_arrangement == 'Onsite' %}
+                                    <span class="badge badge-work-onsite mono-tag"><i class="bi bi-building me-1"></i>Onsite</span>
+                                    {% else %}
+                                    <span class="badge badge-work-unspecified mono-tag">{{ job.work_arrangement or 'Unspecified' }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- 3. Employment Type & Qualifications -->
+                        <td class="col-nowrap" data-sort-val="{{ job.experience_tier }}">
+                            <div class="d-flex flex-column gap-1">
+                                <div class="d-flex align-items-center gap-1 flex-wrap">
+                                    <span class="badge badge-employment mono-tag" title="Tipe Kontrak">
+                                        <i class="bi bi-briefcase me-1"></i>{{ job.employment_type }}
+                                    </span>
+                                    <span class="badge {{ job.experience_badge_class }} mono-tag" title="Tingkat Pengalaman: {{ job.experience_tier }}">
+                                        <i class="bi bi-clock-history me-1"></i>{{ job.experience_display }}
+                                    </span>
+                                </div>
+                                {% if job.education_level and job.education_level != 'Not Specified' %}
+                                <div>
+                                    <span class="badge badge-edu mono-tag" title="Pendidikan Minimal">
+                                        <i class="bi bi-mortarboard me-1"></i>{{ job.education_level }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- 4. Skills -->
+                        <td class="col-flexible">
+                            {% if job.skills %}
+                            <div class="skills-container" title="Klik untuk melihat seluruh keahlian">
+                                {% for skill in job.skills[:3] %}
+                                <span class="badge-skill trigger-skills-modal" role="button">{{ skill }}</span>
+                                {% endfor %}
+                                {% if job.skills|length > 3 %}
+                                <span class="badge-skill-more trigger-skills-modal" role="button"
+                                    title="Lihat semua {{ job.skills|length }} keahlian">
+                                    +{{ job.skills|length - 3 }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span class="text-muted small fw-medium" style="font-size: 0.78rem;">Not specified</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- 5. Salary -->
+                        <td class="col-nowrap" data-sort-val="{{ job.salary_sort_val }}">
+                            {% if job.salary_min and job.salary_max %}
+                            <span class="badge-tech badge-salary">
+                                Rp {{ "{:,.0f}".format(job.salary_min / 1000000) }}Jt - {{
+                                "{:,.0f}".format(job.salary_max / 1000000) }}Jt
+                            </span>
+                            {% elif job.salary_min %}
+                            <span class="badge-tech badge-salary">
+                                Min Rp {{ "{:,.0f}".format(job.salary_min / 1000000) }}Jt
+                            </span>
+                            {% else %}
+                            <span class="text-secondary small fw-semibold" style="font-size: 0.78rem;">Disclosed on
+                                Interview</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- 5. Posted Date -->
+                        <td class="col-nowrap" data-sort-val="{{ job.posted_at_iso }}">
+                            <div class="posted-cell">
+                                <span class="posted-date">
+                                    <i class="bi bi-calendar-event text-warning"></i>
+                                    {{ job.posted_at_date }}
+                                </span>
+                                <span class="posted-time">
+                                    <i class="bi bi-clock text-muted"></i>
+                                    {{ job.posted_at_time }}
+                                </span>
+                            </div>
+                        </td>
+
+                        <!-- 6. Platform -->
+                        <td class="col-nowrap" data-sort-val="{{ job.source_platform }}">
+                            {% if job.source_platform == 'Glints' %}
+                            <span class="badge-tech badge-glints">
+                                <i class="bi bi-globe"></i> Glints
+                            </span>
+                            {% else %}
+                            <span class="badge-tech badge-kalibrr">
+                                <i class="bi bi-briefcase"></i> Kalibrr
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- 7. Action / Apply Button & Bookmark -->
+                        <td class="col-nowrap text-end">
+                            <div class="d-flex align-items-center justify-content-end gap-2">
+                                <button type="button" 
+                                        class="btn-bookmark {% if job.is_saved %}saved{% endif %}" 
+                                        title="{% if job.is_saved %}Tersimpan di Tracker{% else %}Simpan ke Tracker Lamaran{% endif %}">
+                                    <i class="bi {% if job.is_saved %}bi-bookmark-check-fill text-warning{% else %}bi-bookmark-plus{% endif %}"></i>
+                                </button>
+                                {% if job.job_url %}
+                                <a href="{{ job.job_url }}" target="_blank" rel="noopener noreferrer" class="btn-apply"
+                                    title="Lamar di {{ job.source_platform }}">
+                                    <span>Lamar</span>
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                                {% else %}
+                                <span class="btn-apply" style="opacity: 0.5; pointer-events: none;">
+                                    Tutup
+                                </span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr id="emptyRow">
+                        <td colspan="9" class="text-center py-5">
+                            <i class="bi bi-search fs-2 mb-2 d-block text-secondary"></i>
+                            <div class="fw-bold mb-1" style="color: var(--text-primary); font-size: 1.05rem;">Tidak ada
+                                lowongan yang cocok dengan filter atau kata kunci.</div>
+                            <small class="text-secondary fw-semibold">Coba kurangi kata kunci, cek ejaan, atau pilih
+                                opsi "Semua Posisi".</small>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TABLE PAGINATION BAR -->
+        <div
+            class="table-pagination-bar d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+            <div class="pagination-info text-secondary small fw-semibold" id="paginationInfo">
+                Menampilkan <span id="pageStart" class="text-white fw-bold">1</span> - <span id="pageEnd"
+                    class="text-white fw-bold">15</span> dari <span id="pageTotal" class="text-white fw-bold">{{
+                    total_found }}</span> lowongan
+            </div>
+            <nav aria-label="Job Explorer Pagination">
+                <ul class="pagination pagination-studio mb-0" id="paginationControls">
+                    <!-- Populated dynamically by jobs.js -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<!-- ALL SKILLS & JOB DETAILS MODAL -->
+<div class="modal fade" id="skillsModal" tabindex="-1" aria-labelledby="skillsModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content modal-content-studio">
+            <div class="modal-header modal-header-studio">
+                <div>
+                    <h5 class="modal-title fw-bold mb-1" id="skillsModalTitle"
+                        style="color: var(--text-primary); font-size: 1.15rem;">
+                        Detail Lowongan
+                    </h5>
+                    <div class="text-secondary small fw-medium" id="skillsModalCompany">
+                        Perusahaan
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Badges Row -->
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    <span class="badge studio-badge-role mono-tag" id="skillsModalRole">Role</span>
+                    <span class="badge mono-tag" id="skillsModalArrangement">Skema</span>
+                    <span class="badge badge-employment mono-tag" id="skillsModalEmpType">Tipe Kontrak</span>
+                    <span class="badge mono-tag" id="skillsModalExp">Pengalaman</span>
+                    <span class="badge badge-edu mono-tag" id="skillsModalEdu">Pendidikan</span>
+                </div>
+
+                <!-- Info Grid -->
+                <div class="p-3 rounded-3 mb-3" style="background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle);">
+                    <div class="row g-2 small">
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted d-block" style="font-size: 0.72rem;">LOKASI</span>
+                            <span class="fw-semibold" id="skillsModalLocation" style="color: var(--text-primary);">-</span>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <span class="text-muted d-block" style="font-size: 0.72rem;">RENTANG GAJI</span>
+                            <span class="fw-semibold text-success" id="skillsModalSalary">-</span>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <span class="text-muted d-block" style="font-size: 0.72rem;">PORTAL SUMBER</span>
+                            <span class="fw-semibold" id="skillsModalPlatform" style="color: var(--text-primary);">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills Section -->
+                <div class="mb-2 d-flex align-items-center justify-content-between">
+                    <span class="small fw-bold text-uppercase tracking-wider" style="color: var(--text-secondary); font-size: 0.75rem;">
+                        <i class="bi bi-lightning-charge-fill text-warning me-1"></i>Keahlian Yang Dibutuhkan
+                    </span>
+                    <span class="text-muted small fw-semibold" id="skillsModalCount">0 Keahlian</span>
+                </div>
+                <div class="d-flex flex-wrap gap-2" id="skillsModalList">
+                    <!-- Populated dynamically by jobs.js -->
+                </div>
+            </div>
+            <div class="modal-footer modal-footer-studio d-flex justify-content-between">
+                <button type="button" class="btn btn-studio-close" data-bs-dismiss="modal">Tutup</button>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-studio-outline" id="skillsModalSaveBtn">
+                        <i class="bi bi-bookmark-plus me-1"></i>
+                        <span>Simpan Lowongan</span>
+                    </button>
+                    <a href="#" target="_blank" rel="noopener noreferrer" class="btn-apply" id="skillsModalApplyBtn">
+                        <span>Lamar Lowongan Ini</span>
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST ACTION NOTIFICATION -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
+    <div id="jobActionToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true" style="background: #181820; border: 1px solid rgba(255, 110, 64, 0.4) !important;">
+        <div class="d-flex">
+            <div class="toast-body d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                <span id="jobToastMessage">Lowongan berhasil disimpan ke Saved Jobs!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/jobs.js') }}"></script>
+{% endblock %}

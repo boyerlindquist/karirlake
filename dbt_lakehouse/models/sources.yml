@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: raw_data
+    description: "Data mentah dari hasil scraping (Bronze Layer)"
+    tables:
+      - name: kalibrr_jobs
+        description: "Data loker dari Kalibrr"
+        meta:
+          external_location: "read_parquet('data/raw/Kalibrr/*.parquet', union_by_name=true)"
+
+      - name: glints_jobs
+        description: "Data loker dari Glints"
+        meta:
+          external_location: "read_parquet('data/raw/Glints/*.parquet', union_by_name=true)"

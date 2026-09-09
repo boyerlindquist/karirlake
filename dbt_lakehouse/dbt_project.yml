@@ -1,0 +1,17 @@
+name: 'lakehouse'
+version: '1.0.0'
+config-version: 2
+
+profile: 'duckdb_profile'
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+test-paths: ["tests"]
+
+models:
+  lakehouse:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

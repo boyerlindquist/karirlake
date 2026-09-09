@@ -1,0 +1,4 @@
+data_source lakehouse:
+  type: duckdb
+  path: lakehouse.duckdb
+  read_only: true

@@ -1,0 +1,424 @@
+{% extends "base.html" %}
+
+{% block title %}Saved Jobs & Application Tracker | TalentLake{% endblock %}
+
+{% block content %}
+
+<!-- HEADER & ACTION -->
+<section class="py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h2 class="fw-bold mb-0" style="letter-spacing: -0.03em; color: var(--text-primary);">
+                    Saved Jobs & Application Tracker
+                </h2>
+                <span class="badge hero-intel-badge mono-tag">Pipeline</span>
+            </div>
+            <p class="text-secondary mb-0" style="font-size: 0.92rem; font-weight: 500;">
+                Pantau progres rekrutmen: dari simpan lowongan, melamar, interview HR/User, tes teknis, hingga penawaran kerja (offering).
+            </p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ url_for('views.jobs') }}" class="btn btn-apply px-3 py-2">
+                <i class="bi bi-search me-1"></i>
+                <span>Jelajahi Lowongan Baru</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- SCORECARDS SUMMARY -->
+    <div class="row g-3 mb-4">
+        <!-- 1. Total Saved -->
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-secondary small fw-bold">Total Loker</span>
+                    <i class="bi bi-bookmark-fill text-warning fs-6"></i>
+                </div>
+                <div class="fs-4 fw-bold mono-tag" id="statTotal" style="color: var(--text-primary);">{{ stats.total_saved }}</div>
+                <span class="small text-muted" style="font-size: 0.72rem;">Wishlist + Dilamar</span>
+            </div>
+        </div>
+
+        <!-- 2. Applied -->
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-secondary small fw-bold">Sudah Dilamar</span>
+                    <i class="bi bi-send-check-fill text-info fs-6"></i>
+                </div>
+                <div class="fs-4 fw-bold text-info mono-tag" id="statApplied">{{ stats.applied }}</div>
+                <span class="small text-muted" style="font-size: 0.72rem;">CV & Dokumen Terkirim</span>
+            </div>
+        </div>
+
+        <!-- 3. Interviews -->
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-secondary small fw-bold">Tahap Interview</span>
+                    <i class="bi bi-people-fill text-primary fs-6"></i>
+                </div>
+                <div class="fs-4 fw-bold text-primary mono-tag" id="statInterviews">{{ stats.interviews }}</div>
+                <span class="small text-muted" style="font-size: 0.72rem;">HR & User 1/2</span>
+            </div>
+        </div>
+
+        <!-- 4. Offering & Accepted -->
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-secondary small fw-bold">Offering / Lolos</span>
+                    <i class="bi bi-award-fill text-success fs-6"></i>
+                </div>
+                <div class="fs-4 fw-bold text-success mono-tag" id="statOffering">{{ stats.offering + stats.accepted }}</div>
+                <span class="small text-muted" style="font-size: 0.72rem;">{{ stats.accepted }} Diterima</span>
+            </div>
+        </div>
+
+        <!-- 5. Ghosted -->
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-secondary small fw-bold">Ghosted</span>
+                    <i class="bi bi-question-diamond-fill text-secondary fs-6"></i>
+                </div>
+                <div class="fs-4 fw-bold text-secondary mono-tag" id="statGhosted">{{ stats.ghosted }}</div>
+                <span class="small text-muted" style="font-size: 0.72rem;">Tanpa Respon</span>
+            </div>
+        </div>
+
+        <!-- 6. Ditolak / Gugur -->
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi-card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-secondary small fw-bold">Ditolak</span>
+                    <i class="bi bi-x-circle-fill text-danger fs-6"></i>
+                </div>
+                <div class="fs-4 fw-bold text-danger mono-tag" id="statRejected">{{ stats.rejected }}</div>
+                <span class="small text-muted" style="font-size: 0.72rem;">Respon Negatif</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- SANKEY FUNNEL CONVERSION CHART -->
+    <div class="studio-card p-4 mb-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+            <div>
+                <h5 class="fw-bold mb-1" style="color: var(--text-primary); font-size: 1.05rem;">
+                    <i class="bi bi-diagram-3-fill text-warning me-2"></i>Funnel Konversi Rekrutmen (Sankey Chart)
+                </h5>
+                <p class="text-secondary small mb-0">
+                    Alur konversi dari tahap simpan lowongan, pengiriman lamaran, interview HR & User, hingga penawaran kerja (offering) atau muara ghosted/ditolak.
+                </p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge studio-badge-secondary mono-tag" id="sankeyLiveBadge" style="transition: all 0.3s ease;">
+                    <i class="bi bi-broadcast text-success me-1"></i> Live Funnel
+                </span>
+                <span class="badge studio-badge-secondary mono-tag d-none d-md-inline">
+                    <i class="bi bi-info-circle me-1"></i> Interaktif: Arahkan kursor pada alur
+                </span>
+            </div>
+        </div>
+
+        <!-- Chart Container -->
+        <div class="sankey-wrapper" id="sankeyWrapper" style="min-height: 320px; width: 100%; position: relative;">
+            <div id="sankey_chart" style="width: 100%; min-height: 320px;"></div>
+        </div>
+    </div>
+
+    <!-- FILTER TABS & SAVED JOBS TABLE -->
+    <div class="studio-card p-0 overflow-hidden">
+        <!-- Stage Filters Nav -->
+        <div class="p-3 border-bottom border-secondary border-opacity-10 d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-1 flex-wrap" id="stageFilterGroup">
+                <button type="button" data-filter="All"
+                   class="btn btn-sm btn-stage-filter btn-stage-active" id="filterBtn-All">
+                    Semua (<span class="filter-count-all">{{ stats.total_saved }}</span>)
+                </button>
+                <button type="button" data-filter="Wishlist"
+                   class="btn btn-sm btn-stage-filter" id="filterBtn-Wishlist">
+                    Belum Apply (<span class="filter-count-wishlist">{{ stats.wishlist }}</span>)
+                </button>
+                <button type="button" data-filter="Active"
+                   class="btn btn-sm btn-stage-filter" id="filterBtn-Active">
+                    Dalam Proses (<span class="filter-count-active">{{ stats.applied - stats.ghosted - stats.rejected - stats.accepted }}</span>)
+                </button>
+                <button type="button" data-filter="Success"
+                   class="btn btn-sm btn-stage-filter" id="filterBtn-Success">
+                    Diterima (<span class="filter-count-success">{{ stats.accepted }}</span>)
+                </button>
+                <button type="button" data-filter="Ghosted"
+                   class="btn btn-sm btn-stage-filter" id="filterBtn-Ghosted">
+                    Ghosted (<span class="filter-count-ghosted">{{ stats.ghosted }}</span>)
+                </button>
+                <button type="button" data-filter="Rejected"
+                   class="btn btn-sm btn-stage-filter" id="filterBtn-Rejected">
+                    Ditolak (<span class="filter-count-rejected">{{ stats.rejected }}</span>)
+                </button>
+            </div>
+
+            <span class="small text-secondary fw-semibold" id="displayedJobCount">
+                {{ jobs|length }} lowongan ditampilkan
+            </span>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th class="col-flexible">Posisi & Perusahaan</th>
+                        <th class="col-role-tight">Role</th>
+                        <th class="col-nowrap">Lokasi & Tipe</th>
+                        <th class="col-nowrap">Gaji & Platform</th>
+                        <th class="col-nowrap" style="min-width: 200px;">Tahap Progress (Funnel)</th>
+                        <th class="col-nowrap" style="min-width: 160px;">Keterangan Tes</th>
+                        <th class="col-flexible">Catatan Pribadi</th>
+                        <th class="col-nowrap text-end">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="savedJobsTableBody">
+                    {% if jobs %}
+                        {% for job in jobs %}
+                        <tr class="saved-job-row" id="jobRow-{{ job.id }}" data-id="{{ job.id }}"
+                            data-status="{{ job.status }}"
+                            data-filter-category="{% if job.status == 'Wishlist' %}Wishlist{% elif job.status in ['Applied', 'Interview HR', 'Interview User 1', 'Interview User 2', 'Offering'] %}Active{% elif job.status == 'Diterima' %}Success{% elif 'Ghosted' in job.status %}Ghosted{% elif 'Ditolak' in job.status %}Rejected{% else %}Other{% endif %}">
+                            <!-- 1. Position & Company -->
+                            <td class="col-flexible">
+                                <div class="fw-bold mb-1" style="color: var(--text-primary); font-size: 0.95rem;">
+                                    {{ job.job_title }}
+                                </div>
+                                <div class="text-secondary small d-flex align-items-center gap-1 fw-medium">
+                                    <i class="bi bi-building text-muted"></i>
+                                    {% if job.company_url %}
+                                    <a href="{{ job.company_url }}" target="_blank" rel="noopener noreferrer" class="company-link" title="Buka website/profil {{ job.company_name }}">
+                                        <span>{{ job.company_name }}</span>
+                                        <i class="bi bi-box-arrow-up-right ms-1" style="font-size: 0.7rem;"></i>
+                                    </a>
+                                    {% else %}
+                                    <span>{{ job.company_name }}</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <!-- 2. Standard Role -->
+                            <td class="col-role-tight">
+                                <span class="badge studio-badge-role mono-tag">
+                                    {{ job.standard_role or 'Other' }}
+                                </span>
+                            </td>
+
+                            <!-- 3. Location & Work Type -->
+                            <td class="col-nowrap">
+                                <div class="d-flex flex-column gap-1">
+                                    <span class="small fw-semibold" style="color: var(--text-secondary);">
+                                        <i class="bi bi-geo-alt text-danger me-1"></i>{{ job.location_city or 'Indonesia' }}
+                                    </span>
+                                    <div>
+                                        {% set wt = (job.work_type or 'Full Time')|lower %}
+                                        {% if 'remote' in wt or 'wfh' in wt %}
+                                        <span class="badge-work badge-work-remote">
+                                            <i class="bi bi-laptop me-1"></i>Remote
+                                        </span>
+                                        {% elif 'hybrid' in wt %}
+                                        <span class="badge-work badge-work-hybrid">
+                                            <i class="bi bi-building-gear me-1"></i>Hybrid
+                                        </span>
+                                        {% elif 'onsite' in wt or 'on-site' in wt or 'office' in wt %}
+                                        <span class="badge-work badge-work-onsite">
+                                            <i class="bi bi-building me-1"></i>Onsite
+                                        </span>
+                                        {% else %}
+                                        <span class="badge-work badge-work-other">
+                                            <i class="bi bi-briefcase me-1"></i>{{ job.work_type or 'Full Time' }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- 4. Salary & Platform -->
+                            <td class="col-nowrap">
+                                <div class="d-flex flex-column gap-1">
+                                    {% if job.salary_min and job.salary_max %}
+                                    <span class="badge-tech badge-salary" style="font-size: 0.72rem;">
+                                        Rp {{ "{:,.0f}".format(job.salary_min / 1000000) }}Jt - {{ "{:,.0f}".format(job.salary_max / 1000000) }}Jt
+                                    </span>
+                                    {% else %}
+                                    <span class="text-secondary small" style="font-size: 0.72rem;">Negotiable</span>
+                                    {% endif %}
+
+                                    <div>
+                                        {% if job.source_platform == 'Glints' %}
+                                        <span class="badge-tech badge-glints" style="font-size: 0.68rem;">
+                                            <i class="bi bi-globe"></i> Glints
+                                        </span>
+                                        {% else %}
+                                        <span class="badge-tech badge-kalibrr" style="font-size: 0.68rem;">
+                                            <i class="bi bi-briefcase"></i> Kalibrr
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- 5. Stage Progress Selector with Clean Optgroups -->
+                            <td class="col-nowrap">
+                                <select class="form-select form-select-sm stage-dropdown stage-{{ job.status|lower|replace(' ', '-') }}" 
+                                        data-job-id="{{ job.id }}">
+                                    <optgroup label="Tahapan Lamaran">
+                                        {% for s in stages_active %}
+                                        <option value="{{ s }}" {% if job.status == s %}selected{% endif %}>{{ s }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                    <optgroup label="Hasil Akhir">
+                                        {% for s in stages_success %}
+                                        <option value="{{ s }}" {% if job.status == s %}selected{% endif %}>{{ s }}</option>
+                                        {% endfor %}
+                                        {% for s in stages_ghosted %}
+                                        <option value="{{ s }}" {% if job.status == s %}selected{% endif %}>{{ s }}</option>
+                                        {% endfor %}
+                                        {% for s in stages_rejected %}
+                                        <option value="{{ s }}" {% if job.status == s %}selected{% endif %}>{{ s }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                </select>
+                            </td>
+
+                            <!-- 6. Keterangan Tes / Assessment -->
+                            <td class="col-nowrap">
+                                <select class="form-select form-select-sm test-dropdown" 
+                                        data-job-id="{{ job.id }}">
+                                    {% for t in test_types %}
+                                    <option value="{{ t }}" {% if job.test_type == t %}selected{% endif %}>{{ t }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+
+                            <!-- 6. Notes / Catatan -->
+                            <td class="col-flexible">
+                                <div class="notes-preview-box trigger-notes-modal" 
+                                     id="notesPreview-{{ job.id }}" 
+                                     data-job-id="{{ job.id }}" 
+                                     data-job-title="{{ job.job_title }}" 
+                                     data-company="{{ job.company_name }}"
+                                     data-full-notes="{{ job.notes or '' }}"
+                                     title="Klik untuk melihat atau mengedit catatan"
+                                     role="button">
+                                    {% if job.notes %}
+                                    <span class="small text-secondary">{{ job.notes|truncate(50) }}</span>
+                                    <i class="bi bi-pencil-square ms-1 text-warning" style="font-size: 0.8rem;"></i>
+                                    {% else %}
+                                    <span class="small text-muted fst-italic">+ Tambah catatan interview/persiapan...</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <!-- 7. Action -->
+                            <td class="col-nowrap text-end">
+                                <div class="d-flex align-items-center justify-content-end gap-1">
+                                    {% if job.job_url %}
+                                    <a href="{{ job.job_url }}" target="_blank" rel="noopener noreferrer" class="btn-apply btn-sm py-1 px-2" title="Lamar di {{ job.source_platform }}">
+                                        <span>Lamar</span>
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                    </a>
+                                    {% endif %}
+
+                                    <button type="button" class="btn btn-sm btn-studio-outline text-danger py-1 px-2 btn-delete-saved-job" 
+                                            data-job-id="{{ job.id }}" 
+                                            data-job-title="{{ job.job_title }}" 
+                                            title="Hapus dari daftar simpan">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr id="noFilterResultsRow" style="display: none;">
+                            <td colspan="8" class="text-center py-5">
+                                <i class="bi bi-funnel fs-2 mb-2 d-block text-secondary"></i>
+                                <div class="fw-bold mb-1" style="color: var(--text-primary); font-size: 1.05rem;">
+                                    Tidak ada lowongan di kategori ini
+                                </div>
+                                <p class="text-secondary small mb-0">
+                                    Coba pilih kategori filter tahapan lain untuk melihat lowongan yang tersimpan.
+                                </p>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <i class="bi bi-bookmark fs-2 mb-2 d-block text-secondary"></i>
+                                <div class="fw-bold mb-1" style="color: var(--text-primary); font-size: 1.05rem;">
+                                    Belum ada lowongan tersimpan
+                                </div>
+                                <p class="text-secondary small mb-3">
+                                    Simpan lowongan menarik dari halaman Job Explorer untuk memantau proses seleksi Anda.
+                                </p>
+                                <a href="{{ url_for('views.jobs') }}" class="btn btn-apply px-3 py-2">
+                                    <i class="bi bi-search me-1"></i> Jelajahi Job Explorer
+                                </a>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- NOTES MODAL -->
+<div class="modal fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-studio">
+            <div class="modal-header modal-header-studio">
+                <div>
+                    <h5 class="modal-title fw-bold mb-1" id="notesModalTitle" style="color: var(--text-primary); font-size: 1.1rem;">
+                        Catatan Lamaran
+                    </h5>
+                    <div class="text-secondary small fw-medium" id="notesModalSubtitle">
+                        Perusahaan
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="notesJobId">
+                <label class="form-label small fw-semibold text-secondary mb-1">Catatan Pribadi, Jadwal Interview, atau Pertanyaan</label>
+                <textarea id="notesContent" class="form-control form-control-studio" rows="5" 
+                          placeholder="Contoh: Interview User hari Rabu jam 14:00 via Zoom. Fokus pertanyaan pada arsitektur ETL pipeline dan Big Data..."></textarea>
+            </div>
+            <div class="modal-footer modal-footer-studio d-flex justify-content-between">
+                <button type="button" class="btn btn-studio-close" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-apply px-3" id="saveNotesBtn" onclick="saveNotes()">
+                    <i class="bi bi-check2-circle me-1"></i> Simpan Catatan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST FEEDBACK NOTIFICATION -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
+    <div id="trackerToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true" style="background: #181820; border: 1px solid rgba(255, 110, 64, 0.4) !important;">
+        <div class="d-flex">
+            <div class="toast-body d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                <span id="toastMessage">Status berhasil diperbarui</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script id="sankey-raw-data" type="application/json">
+{{ sankey_data|tojson }}
+</script>
+<script src="{{ url_for('static', filename='js/saved_jobs.js') }}?v=9.1"></script>
+{% endblock %}
