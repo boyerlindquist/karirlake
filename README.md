@@ -1,4 +1,4 @@
-# KarirLake: End-to-End Modern Analytical Lakehouse for Indonesia Tech Job Market
+# KarirLake: End-to-End Modern Analytical Lakehouse for Indonesia Data Job Market
 
 [![Airflow](https://img.shields.io/badge/Apache%20Airflow-2.8+-017CEE?style=for-the-badge&logo=Apache%20Airflow&logoColor=white)](https://airflow.apache.org/)
 [![dbt](https://img.shields.io/badge/dbt-Core%20v1.7+-FF694B?style=for-the-badge&logo=dbt&logoColor=white)](https://www.getdbt.com/)
@@ -7,13 +7,13 @@
 [![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-Web%20Dashboard-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
-An automated **Medallion Data Lakehouse** pipeline and analytical intelligence platform that extracts, standardizes, validates, and visualizes fragmented tech job postings and salary compensation benchmarks across Indonesian job portals (currently supporting Glints and Kalibrr, with more portals coming soon).
+An automated **Medallion Data Lakehouse** pipeline and analytical intelligence platform that extracts, standardizes, validates, and visualizes fragmented data-field job postings (*Data Engineer, Data Analyst, Data Scientist, Database Administrator, Data Architect*) and salary compensation benchmarks across Indonesian job portals (currently supporting Glints and Kalibrr, with more portals coming soon).
 
 ---
 
 ## Executive Summary & Problem Statement
 
-Job hunters, engineers, and tech recruiters in Indonesia face major industry pain points:
+Data professionals, job seekers, and recruiters in Indonesia face major industry pain points:
 1. **Fragmented Data & Inconsistent Taxonomy**: Job portals categorize roles, working arrangements (*Onsite / Hybrid / Remote*), and employment types (*Full-time, Contract, Internship*) using conflicting schemas and terminology.
 2. **Opaque Compensation**: Salaries are either undisclosed, formatted differently (e.g. annual vs monthly, string ranges), or lack standardization per city.
 3. **Siloed Tracking**: Candidates apply across multiple portals and lose track of their interview pipeline, lacking clear metrics on their application-to-interview conversion rate.
@@ -115,7 +115,7 @@ The transformation layer conforms to the **Medallion Lakehouse Architecture**:
   - Pure `UNION ALL` conformed dataset combining both platforms with identical schema definitions and deduplication metadata.
 
 ### 3. Gold Layer (Dimensional Analytical Marts)
-- **`mart_top_skills`**: Aggregated skill frequency and industry demand ranking per technical job category.
+- **`mart_top_skills`**: Aggregated skill frequency and industry demand ranking per data role category.
 - **`mart_salary_insights`**: Min, average mid, and max compensation benchmarks segmented by role and city.
 - **`mart_work_arrangement_trends`**: Time-series proportion of WFH/Remote, Hybrid, and Onsite job availability.
 - **`mart_employment_type_trends`**: Proportion of permanent roles vs contractual and internship opportunities.
@@ -174,7 +174,7 @@ The consumption layer ([KarirLake Web Platform](file:///home/imam/project/analyt
 1. **Analytical Executive Dashboard**:
    - High-level KPIs: Total Verified Jobs, Average Market Salary (IDR), Remote Ratio Index, Active Employers.
    - Dynamic interactive charts: *Top In-Demand Skills*, *Salary by Location*, *Work Arrangement Spread*, *Employment Type Distribution*, and *Experience Seniority Tiers*.
-   - Reactive Role Filter Pills (*Data Engineer, Data Analyst, Software Engineer, Data Scientist, ML Engineer*) that update all charts and metrics asynchronously via REST APIs.
+   - Reactive Role Filter Pills (*Data Engineer, Data Analyst, Data Scientist, Database Administrator, Data Architect*) that update all charts and metrics asynchronously via REST APIs.
 
 2. **Live Job Explorer**:
    - Sub-millisecond Fuzzy Keyword Search powered by Levenshtein distance matching across position, skills, company, and location.
@@ -196,8 +196,8 @@ The consumption layer ([KarirLake Web Platform](file:///home/imam/project/analyt
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/analytic-lakehouse.git
-cd analytic-lakehouse
+git clone https://github.com/boyerlindquist/karirlake.git
+cd karirlake
 ```
 
 ### 2. Launch the Orchestration & Lakehouse Environment
