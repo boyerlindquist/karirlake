@@ -19,11 +19,11 @@ SELECT
     city AS location_city,
     -- 1. Status Hubungan Kerja (Tipe Kontrak)
     CASE UPPER(COALESCE(employment_type, ''))
-        WHEN 'FULL_TIME'  THEN 'Full-time'
-        WHEN 'CONTRACT'   THEN 'Contract'
+        WHEN 'FULL_TIME' THEN 'Full-time'
+        WHEN 'CONTRACT' THEN 'Contract'
         WHEN 'INTERNSHIP' THEN 'Internship'
-        WHEN 'PART_TIME'  THEN 'Part-time'
-        WHEN 'PROJECT'    THEN 'Freelance'
+        WHEN 'PART_TIME' THEN 'Part-time'
+        WHEN 'PROJECT' THEN 'Freelance'
         ELSE 'Not Specified'
     END AS employment_type,
     -- 2. Skema Lokasi Kehadiran Fisik
@@ -59,7 +59,7 @@ SELECT
         ELSE COALESCE(education_level, 'Not Specified')
     END AS education_level,
     CAST(min_experience AS VARCHAR) AS min_experience,
-    CAST(posted_at AS TIMESTAMP) AS posted_at,
+    CAST(posted_at AS TIMESTAMPTZ) AT TIME ZONE 'Asia/Jakarta' AS posted_at,
     CAST(deadline_at AS TIMESTAMP) AS deadline_at,
     skills,
     'Glints' AS source_platform

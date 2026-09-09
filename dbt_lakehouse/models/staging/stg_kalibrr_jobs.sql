@@ -18,22 +18,23 @@ SELECT
     ) AS job_url,
     city AS location_city,
     -- 1. Status Hubungan Kerja (Tipe Kontrak)
-    CASE 
+    CASE
         WHEN LOWER(employment_type) LIKE '%full%' THEN 'Full-time'
         WHEN LOWER(employment_type) LIKE '%contract%' THEN 'Contract'
         WHEN LOWER(employment_type) LIKE '%part%' THEN 'Part-time'
         WHEN LOWER(employment_type) LIKE '%intern%' THEN 'Internship'
-        WHEN LOWER(employment_type) LIKE '%freelance%' OR LOWER(employment_type) LIKE '%project%' THEN 'Freelance'
+        WHEN LOWER(employment_type) LIKE '%freelance%'
+        OR LOWER(employment_type) LIKE '%project%' THEN 'Freelance'
         ELSE COALESCE(employment_type, 'Not Specified')
     END AS employment_type,
     -- 2. Skema Lokasi Kehadiran Fisik
-    CASE 
+    CASE
         WHEN is_wfh = TRUE THEN 'Remote'
         WHEN is_hybrid = TRUE THEN 'Hybrid'
         ELSE 'Onsite'
     END AS work_arrangement,
     -- Alias work_type untuk kompatibilitas downstream
-    CASE 
+    CASE
         WHEN is_wfh = TRUE THEN 'Remote'
         WHEN is_hybrid = TRUE THEN 'Hybrid'
         ELSE 'Onsite'
@@ -65,7 +66,7 @@ SELECT
         END AS VARCHAR
     ) AS min_experience,
     -- CAST(work_experience AS VARCHAR) AS min_experience,
-    CAST(posted_at AS TIMESTAMP) AS posted_at,
+    CAST(posted_at AS TIMESTAMPTZ) AT TIME ZONE 'Asia/Jakarta' AS posted_at,
     CAST(deadline_at AS TIMESTAMP) AS deadline_at,
     skills,
     'Kalibrr' AS source_platform
