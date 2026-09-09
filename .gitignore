@@ -27,4 +27,5 @@ airflow/*.pid
 # OS & Editor
 .DS_Store
 .idea/
-.agents/.vscode/
+.agents/
+.vscode/
